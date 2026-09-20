@@ -3,8 +3,8 @@
 # Copyright (C) 2026 VIKINGYFY
 #
 # [S20L 精简版] 本文件已移除未被调用的 UPDATE_VERSION 函数，降低出错概率
-# 仅保留 aurora / aurora-config 两行（Settings.sh 的 WRT_THEME=aurora 强制引用，删了必挂）
-# 其余 UPDATE_PACKAGE 行全部以 # 注释 —— 不删行，方便随时恢复
+# 所有 UPDATE_PACKAGE 行均已注释（含 aurora 两行）
+# 主题改为 argon，由官方 feed 提供，见 MTK-ALL.yml 的 WRT_THEME
 
 #安装和更新软件包
 UPDATE_PACKAGE() {
@@ -42,10 +42,14 @@ UPDATE_PACKAGE() {
 }
 
 # ============================================================
-# 主题（必留：Settings.sh 强制引用 WRT_THEME=aurora）
+# 主题
+# 注意：主题由 MTK-ALL.yml 的 WRT_THEME 决定，当前设为 argon
+#   luci-theme-argon / luci-app-argon-config 均在官方 feed 内，无需 clone
+#   aurora 已弃用：其 clone 落在源码树根目录（不在 ./package/），构建系统扫不到
+#   故此处两行一并注释，保持构建树干净
 # ============================================================
-UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
-UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
+# UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
+# UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
 
 # ============================================================
 # 以下全部注释：【主题】不需要的备用主题
