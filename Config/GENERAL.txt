@@ -25,7 +25,8 @@ CONFIG_PACKAGE_kmod-ata-ahci=n
 CONFIG_PACKAGE_kmod-ata-core=n
 CONFIG_PACKAGE_kmod-bonding=n
 CONFIG_PACKAGE_kmod-dsa=y
-CONFIG_PACKAGE_kmod-dummy=n
+#nikki 必需：创建 dummy 网卡作为透明代理入口（原为 n）
+CONFIG_PACKAGE_kmod-dummy=y
 CONFIG_PACKAGE_kmod-fs-btrfs=n
 CONFIG_PACKAGE_kmod-fs-ksmbd=n
 CONFIG_PACKAGE_kmod-fuse=n
@@ -46,7 +47,8 @@ CONFIG_PACKAGE_kmod-nft-nat=y
 CONFIG_PACKAGE_kmod-nft-netdev=n
 CONFIG_PACKAGE_kmod-nft-offload=y
 CONFIG_PACKAGE_kmod-nft-queue=n
-CONFIG_PACKAGE_kmod-nft-socket=n
+#nikki 必需：nft socket 匹配（原为 n；kmod-nft-tproxy 内部引用它）
+CONFIG_PACKAGE_kmod-nft-socket=y
 CONFIG_PACKAGE_kmod-nft-tproxy=y
 CONFIG_PACKAGE_kmod-nft-xfrm=n
 CONFIG_PACKAGE_kmod-sound-core=n
@@ -84,6 +86,7 @@ CONFIG_PACKAGE_kmod-veth=n
 CONFIG_PACKAGE_kmod-wireguard=n
 #组件调整
 CONFIG_PACKAGE_autocore=y
+#nikki 非必需：原为 OpenClash 准备，保留无害体积很小（nikki 用 ucode+sh）
 CONFIG_PACKAGE_bash=y
 CONFIG_PACKAGE_blkid=y
 CONFIG_PACKAGE_ca-bundle=y
@@ -93,7 +96,7 @@ CONFIG_PACKAGE_coremark=n
 CONFIG_PACKAGE_cpufreq=y
 CONFIG_PACKAGE_curl=y
 CONFIG_PACKAGE_dmesg=n
-#OpenClash 依赖（本体不编译，将来 apk 装；这些编进只读段）
+#nikki 配合使用：dnsmasq-full 提供 nftset 能力（DNS 分流），原为 OpenClash 依赖
 CONFIG_PACKAGE_dnsmasq-full=y
 CONFIG_PACKAGE_exfat-fsck=n
 CONFIG_PACKAGE_exfat-mkfs=n
@@ -117,15 +120,19 @@ CONFIG_PACKAGE_openssh-keygen=y
 CONFIG_PACKAGE_openssh-sftp-server=y
 CONFIG_PACKAGE_openssl-util=y
 CONFIG_PACKAGE_proto-bonding=n
-CONFIG_PACKAGE_ruby=y
-CONFIG_PACKAGE_ruby-yaml=y
+#OpenClash 残留清除：Ruby 运行时仅供 OpenClash 使用，nikki 完全不需要（省约 10-18 MB）
+CONFIG_PACKAGE_ruby=n
+CONFIG_PACKAGE_ruby-yaml=n
 CONFIG_PACKAGE_sfdisk=n
 CONFIG_PACKAGE_sgdisk=n
 CONFIG_PACKAGE_smartmontools=n
 CONFIG_PACKAGE_smartmontools-drivedb=n
 CONFIG_PACKAGE_stuntman-client=n
+#nikki 非必需：原为 OpenClash 准备，保留无害体积很小
 CONFIG_PACKAGE_unzip=y
 CONFIG_PACKAGE_usb-modeswitch=n
 CONFIG_PACKAGE_usbmuxd=n
 CONFIG_PACKAGE_usbutils=n
 CONFIG_PACKAGE_xz-utils=y
+#nikki 必需：yaml 命令行处理器，nikki 用它在运行时改写配置
+CONFIG_PACKAGE_yq=y
