@@ -55,23 +55,23 @@ CONFIG_PACKAGE_kmod-nft-tproxy=y
 CONFIG_PACKAGE_kmod-nft-xfrm=n
 CONFIG_PACKAGE_kmod-sound-core=n
 CONFIG_PACKAGE_kmod-tun=y
-#USB 全链剔除：控制器 + 子系统 + 存储 + 音频，一项不留
-#注意：这 4 项此前未显式声明，是被默认值拉入的（=y），必须显式压成 =n
-CONFIG_PACKAGE_kmod-usb-common=n
-CONFIG_PACKAGE_kmod-usb-core=n
-CONFIG_PACKAGE_kmod-usb-roles=n
-CONFIG_PACKAGE_kmod-usb-xhci-hcd=n
-CONFIG_PACKAGE_kmod-usb-xhci-mtk=n
-#USB 控制器（含 USB3 与老式 1.1/2.0）
-CONFIG_PACKAGE_kmod-usb3=n
+#USB：保留核心栈 + 存储链 + MTK USB3 控制器（U 盘/移动硬盘可用）
+#前 5 项由 block-mount 依赖链强制拉入，无法剔除，故显式声明为 y
+CONFIG_PACKAGE_kmod-usb-core=y
+CONFIG_PACKAGE_kmod-usb-common=y
+CONFIG_PACKAGE_kmod-usb-storage=y
+CONFIG_PACKAGE_kmod-usb-storage-extras=y
+CONFIG_PACKAGE_kmod-usb-storage-uas=y
+#主机控制器：S20L(MT7986) 走 xhci-mtk，启用 usb3 会自动连带这两项
+CONFIG_PACKAGE_kmod-usb3=y
+CONFIG_PACKAGE_kmod-usb-xhci-hcd=y
+CONFIG_PACKAGE_kmod-usb-xhci-mtk=y
+#以下不需要：DWC3、角色切换、老式 USB1.1/2.0 控制器、USB 声卡
 CONFIG_PACKAGE_kmod-usb-dwc3=n
+CONFIG_PACKAGE_kmod-usb-roles=n
 CONFIG_PACKAGE_kmod-usb-ohci=n
 CONFIG_PACKAGE_kmod-usb-ehci=n
 CONFIG_PACKAGE_kmod-usb-uhci=n
-#USB 存储与音频
-CONFIG_PACKAGE_kmod-usb-storage=n
-CONFIG_PACKAGE_kmod-usb-storage-extras=n
-CONFIG_PACKAGE_kmod-usb-storage-uas=n
 CONFIG_PACKAGE_kmod-usb-audio=n
 #USB 网卡驱动（QModem/手机共享用）
 CONFIG_PACKAGE_kmod-usb-net=n
