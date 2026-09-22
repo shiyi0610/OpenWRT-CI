@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2026 VIKINGYFY
 #
-# [S20L 精简版] 本文件已移除未被调用的 UPDATE_VERSION 函数，降低出错概率
-# 所有 UPDATE_PACKAGE 行均已注释（含 aurora 两行）
-# 主题改为 argon，由官方 feed 提供，见 MTK-ALL.yml 的 WRT_THEME
+# [S20L aurora 版]
+# 本文件恢复了上游原版的 UPDATE_PACKAGE 函数体（补回 REPO_PATH），
+# 修复 clone 落错目录导致 aurora 主题不被识别的问题。
+# aurora / aurora-config 两行启用且【不带第 4 参数】，其余调用行全部注释。
+# 已移除未被调用的 UPDATE_VERSION 函数，降低粘贴出错概率。
 
 #安装和更新软件包
 UPDATE_PACKAGE() {
@@ -14,12 +16,14 @@ UPDATE_PACKAGE() {
 	local PKG_SPECIAL=$4
 	local PKG_LIST=("$PKG_NAME" $5)
 	local REPO_NAME=${PKG_REPO#*/}
+	local REPO_PATH="./package/$REPO_NAME"
 
 	echo " "
 
+	# 删除本地可能存在的不同名称的软件包
 	for NAME in "${PKG_LIST[@]}"; do
 		echo "Search directory: $NAME"
-		local FOUND_DIRS=$(find ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "*$NAME*" 2>/dev/null)
+		local FOUND_DIRS=$(find ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "*$NAME*" 2>/dev/null)
 
 		if [ -n "$FOUND_DIRS" ]; then
 			while read -r DIR; do
@@ -31,29 +35,30 @@ UPDATE_PACKAGE() {
 		fi
 	done
 
-	git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git"
+	# 克隆 GitHub 仓库（目标为 ./package/，构建系统才能扫到）
+	git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git" $REPO_PATH
 
+	# 仅"大杂烩仓库"需要 pkg 参数，单包仓库切勿加
 	if [[ "$PKG_SPECIAL" == "pkg" ]]; then
-		find ./$REPO_NAME/*/ -maxdepth 3 -type d -iname "*$PKG_NAME*" -prune -exec cp -rf {} ./ \;
-		rm -rf ./$REPO_NAME/
-	elif [[ "$PKG_SPECIAL" == "name" ]]; then
-		mv -f $REPO_NAME $PKG_NAME
+		find $REPO_PATH/*/ -maxdepth 3 -type d -iname "*$PKG_NAME*" -prune -exec cp -rf {} ./package \;
+		rm -rf $REPO_PATH
 	fi
 }
 
 # ============================================================
-# 主题
-# 注意：主题由 MTK-ALL.yml 的 WRT_THEME 决定，当前设为 argon
-#   luci-theme-argon / luci-app-argon-config 均在官方 feed 内，无需 clone
-#   aurora 已弃用：其 clone 落在源码树根目录（不在 ./package/），构建系统扫不到
-#   故此处两行一并注释，保持构建树干净
+# 主题：aurora（本次启用）
+#   clone 落到 ./package/luci-theme-aurora 与 ./package/luci-app-aurora-config
+#   包名由目录名决定，与 Settings.sh 追加的配置项自动对齐
+#   注意：这两行【不带】第 4 参数（pkg 会让包被 rm -rf 删除）
 # ============================================================
-# UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
-# UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
+UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
+UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
 
 # ============================================================
-# 以下全部注释：【主题】不需要的备用主题
+# 以下全部注释
 # ============================================================
+
+# 备用主题
 # UPDATE_PACKAGE "argon" "sbwml/luci-theme-argon" "openwrt-25.12"
 # UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "master"
 # UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
@@ -61,19 +66,14 @@ UPDATE_PACKAGE() {
 # UPDATE_PACKAGE "shadcn" "eamonxg/luci-theme-shadcn" "main"
 # UPDATE_PACKAGE "theme-fluent" "LazuliKao/luci-theme-fluent" "main"
 
-# ============================================================
-# 以下全部注释：【代理/科学上网】不需要
-# ============================================================
+# 代理类
 # UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
 # UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
 # UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
 # UPDATE_PACKAGE "passwall" "Openwrt-Passwall/openwrt-passwall" "main" "pkg"
 # UPDATE_PACKAGE "passwall2" "Openwrt-Passwall/openwrt-passwall2" "main" "pkg"
 
-# ============================================================
-# 以下全部注释：【不需要的插件】
-# 注意 viking 行含 gecoosac/homeproxy/wolultra 等 7 个包
-# ============================================================
+# 其他插件
 # UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
 # UPDATE_PACKAGE "easytier" "EasyTier/luci-app-easytier" "main"
 # UPDATE_PACKAGE "qmodem" "FUjr/QModem" "main"
@@ -90,21 +90,25 @@ UPDATE_PACKAGE() {
 # UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"
 # UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
 
-# ============================================================
-# 以下全部注释：【NAT 穿透 / STUN】
-# ============================================================
+# NAT 穿透 / STUN
 # UPDATE_PACKAGE "natmapt" "muink/openwrt-natmapt" "master"
 # UPDATE_PACKAGE "stuntman" "muink/openwrt-stuntman" "master"
 # UPDATE_PACKAGE "luci-app-natmapt" "muink/luci-app-natmapt" "master"
 
-# ============================================================
-# 以下全部注释：【设备专用插件】
-# ============================================================
-# UPDATE_PACKAGE "airpi3000m" "LianXia233/luci-app-airpi3000m-fancontrol" "main"
-# UPDATE_PACKAGE "h5000m" "LianXia233/luci-app-h5000m-netmode" "main"
+# 设备专用
+# UPDATE_PACKAGE "airpi3000m-fancontrol" "LianXia233/luci-app-airpi3000m-fancontrol" "main"
+# UPDATE_PACKAGE "chfs" "LianXia233/luci-app-chfs" "main"
+# UPDATE_PACKAGE "fm350" "LianXia233/luci-app-fm350" "main"
+# UPDATE_PACKAGE "h5000m-netmode" "LianXia233/luci-app-h5000m-netmode" "main"
+# UPDATE_PACKAGE "mt5700" "LianXia233/luci-app-mt5700" "main"
+# UPDATE_PACKAGE "mt5700m" "LianXia233/luci-app-mt5700m" "main"
+# UPDATE_PACKAGE "netmonitor" "LianXia233/luci-app-netmonitor" "main"
 # UPDATE_PACKAGE "qmodem-generic" "LianXia233/luci-app-qmodem-generic" "main"
 
 #引入私有扩展脚本
+if [ -f "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh" ]; then
+	source "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh"
+fi
 if [ -f "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh" ]; then
 	source "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh"
 fi
