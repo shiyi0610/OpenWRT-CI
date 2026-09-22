@@ -109,6 +109,3 @@ UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
 if [ -f "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh" ]; then
 	source "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh"
 fi
-if [ -f "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh" ]; then
-	source "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh"
-fi
